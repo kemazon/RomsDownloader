@@ -14,15 +14,15 @@ else
 fi
 
 # URL del script a descargar
-SCRIPT_URL="https://raw.githubusercontent.com/kemazon/tools/refs/heads/main/downloader.sh"
+SCRIPT_URL="https://raw.githubusercontent.com/kemazon/RomsDownloader/refs/heads/main/downloader.sh"
 
-GPTK_URL="https://raw.githubusercontent.com/kemazon/tools/refs/heads/main/downloader.gptk"
+GPTK_URL="https://raw.githubusercontent.com/kemazon/RomsDownloader/refs/heads/main/downloader.gptk"
 GPTK_DEST="/opt/inttools/downloader.gptk"
 
-RC_URL="https://raw.githubusercontent.com/kemazon/tools/refs/heads/main/.lynxrc"
+RC_URL="https://raw.githubusercontent.com/kemazon/RomsDownloader/refs/heads/main/.lynxrc"
 RC_DEST="/home/ark/.lynxrc"
 
-CFG_URL="https://raw.githubusercontent.com/kemazon/tools/refs/heads/main/lynx.cfg"
+CFG_URL="https://raw.githubusercontent.com/kemazon/RomsDownloader/refs/heads/main/lynx.cfg"
 CFG_DEST="/etc/lynx/lynx.cfg"
 
 sudo chmod u+s $(which ping)
