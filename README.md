@@ -1,6 +1,6 @@
 # RomsDownloader
-Gestor de descargas oara ROMS de la consola R36S
-colocar instalador.sh en roms/tools ó /roms2/tools según el caso, al ejecutarlo instalará las dependencias necesarias (curl, wget, unzip y lynx) y descargará el script (downloader.sh)
+Gestor de descargas para ROMS de la consola R36S
+colocar instalador.sh en /roms/tools ó /roms2/tools según el caso, al ejecutarlo instalará las dependencias necesarias (curl, wget, unzip y lynx) y descargará el script (downloader.sh)
 
 Usa un navegador en modo texto
 - A ó B para abrir links
