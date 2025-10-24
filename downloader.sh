@@ -1,113 +1,93 @@
 #!/bin/bash
-#sudo nmui
-#mod
-sudo chmod 666 /dev/tty1
-#printf "\033c" > /dev/tty1
-reset
 
-# hide cursor
-printf "\e[?25l" > /dev/tty1
-dialog --clear
+# Lista de paquetes requeridos.
+REQUIRED_PACKAGES=("curl" "wget" "unzip" "lynx")
 
-height="15"
-width="55"
+SCRIPT_NAME=$(basename "$0")
 
-if test ! -z "$(cat /home/ark/.config/.DEVICE | grep RG503 | tr -d '\0')"
-then
-  height="20"
-  width="60"
-elif test ! -z "$(cat /home/ark/.config/.DEVICE | grep RGB20PRO | tr -d '\0')"
-then
-  height="20"
-  width="70"
-fi
-
-export TERM=linux
-export XDG_RUNTIME_DIR=/run/user/$UID/
-
-if [[ ! -e "/dev/input/by-path/platform-odroidgo2-joypad-event-joystick" ]]; then
-  if test ! -z "$(cat /home/ark/.config/.DEVICE | grep RG503 | tr -d '\0')"
-  then
-    sudo setfont /usr/share/consolefonts/Lat7-TerminusBold20x10.psf.gz
-  elif test ! -z "$(cat /home/ark/.config/.DEVICE | grep RGB20PRO | tr -d '\0')"
-  then
-    sudo setfont /usr/share/consolefonts/Lat7-TerminusBold32x16.psf.gz
-  else
-    sudo setfont /usr/share/consolefonts/Lat7-TerminusBold22x11.psf.gz
-  fi
+# Definir ruta de descarga
+if [ -d "/roms2/tools" ]; then
+	TOOLS_DEST="/roms2/tools/"
+elif [ -d "/roms/tools" ]; then
+	TOOLS_DEST="/roms/tools/"
 else
-  sudo setfont /usr/share/consolefonts/Lat7-Terminus16.psf.gz
+    echo "❌ No se encontró ninguna de las rutas /roms2/tools ni /roms/tools."
+    exit 1
 fi
 
-pgrep -f gptokeyb | sudo xargs kill -9
-pgrep -f osk.py | sudo xargs kill -9
-printf "\033c" > /dev/tty1
-printf "Iniciando Download Manager.  Espera..." > /dev/tty1
+SCRIPT_URL="https://raw.githubusercontent.com/kemazon/RomsDownloader/refs/heads/main/downloader.sh"
+SCRIPT_DESTINO="$TOOLS_DEST/$SCRIPT_NAME"
 
-old_ifs="$IFS"
+GPTK_URL="https://raw.githubusercontent.com/kemazon/RomsDownloader/refs/heads/main/downloader.gptk"
+GPTK_DEST="/opt/inttools/downloader.gptk"
 
-ToggleWifi() {
-  MainMenu
+RC_URL="https://raw.githubusercontent.com/kemazon/RomsDownloader/refs/heads/main/.lynxrc"
+RC_DEST="/home/ark/.lynxrc"
+
+CFG_URL="https://raw.githubusercontent.com/kemazon/RomsDownloader/refs/heads/main/lynx.cfg"
+CFG_DEST="/etc/lynx/lynx.cfg"
+
+sudo chmod u+s $(which ping)
+
+# Verifica conexión a internet
+check_internet() {
+    if ping -c 1 8.8.8.8 &>/dev/null || ping -c 1 1.1.1.1 &>/dev/null; then
+        echo "✔ Conexión a internet disponible."
+        return 0
+    else
+        echo "✖ No hay conexión a internet. No se puede continuar."
+		sleep 5
+        exit 1
+    fi
 }
 
-ExitMenu() {
-  printf "\033c" > /dev/tty1
-  if [[ ! -z $(pgrep -f gptokeyb) ]]; then
-    pgrep -f gptokeyb | sudo xargs kill -9
-  fi
-  if [[ ! -e "/dev/input/by-path/platform-odroidgo2-joypad-event-joystick" ]]; then
-    sudo setfont /usr/share/consolefonts/Lat7-Terminus20x10.psf.gz
-  fi
-  exit 0
-}
-
-
-Connect() {
-  dialog --infobox "\nAbriendo la WEB ..." 5 $width > /dev/tty1
-  sleep 1
-  lynx "https://myrient.erista.me/files/" -nomore
-}
-
-MainMenu() {
-
-  mainoptions=( 1 "Abrir la WEB para descargar ROMS" 2 "Salir" )
-  IFS="$old_ifs"
-  while true; do
-    mainselection=(dialog \
-   	--backtitle "ROMs Downloader:" \
-   	--title "Menú Principal" \
-   	--no-collapse \
-   	--clear \
-	--cancel-label "Select + Start = Salir" \
-    --menu "Elije una opción" $height $width 15)
-	
-	mainchoices=$("${mainselection[@]}" "${mainoptions[@]}" 2>&1 > /dev/tty1)
-	if [[ $? != 0 ]]; then
-	  exit 1
-	fi
-    for mchoice in $mainchoices; do
-      case $mchoice in
-    1) Connect ;;
-    2) ExitMenu ;;
-      esac
+# Verifica e instala paquetes según la distribución
+install_packages() {
+    for package in "${REQUIRED_PACKAGES[@]}"; do
+        if ! command -v "$package" &>/dev/null; then
+            echo "⚠ El paquete '$package' no está instalado. Instalando..."
+            if [[ -f /etc/debian_version ]]; then
+                sudo apt update && sudo apt install -y "$package"
+            elif [[ -f /etc/arch-release ]]; then
+                sudo pacman -Sy --noconfirm "$package"
+            else
+                echo "❌ No se pudo determinar la distribución. Instale '$package' manualmente."
+                exit 1
+            fi
+        else
+            echo "✔ '$package'"
+        fi
     done
-  done
 }
 
-sudo chmod 666 /dev/uinput
-
-export SDL_GAMECONTROLLERCONFIG_FILE="/opt/inttools/gamecontrollerdb.txt"
-export TEXTINPUTPRESET="My Name"        # defines preset text to insert
-export TEXTINPUTINTERACTIVE="Y"         # enables interactive text input mode
-export TEXTINPUTNOAUTOCAPITALS="Y"      # disables automatic capitalisation of first letter of words in interactive text input mode
-export TEXTINPUTADDEXTRASYMBOLS="Y"     # enables additional symbols for interactive text input
-export TEXTINPUTNUMBERSONLY="Y"         # only scrolls integers 0 - 9 in interactive text input mode
-
-if [[ ! -z $(pgrep -f gptokeyb) ]]; then
-  pgrep -f gptokeyb | sudo xargs kill -9
+update_script() {
+	REMOTE_HASH=$(curl -sL "$SCRIPT_URL" | sha1sum | awk '{print $1}')
+	echo $REMOTE_HASH
+	LOCAL_HASH=$(sha1sum "$TOOLS_DEST/$SCRIPT_NAME" | awk '{print $1}')
+	echo $LOCAL_HASH
+	
+	if [ "$REMOTE_HASH" != "$LOCAL_HASH" ]; then
+		echo "⚠️  Hay una versión más reciente disponible en GitHub."
+	else
+		echo "✅  El script está actualizado."
 fi
-/opt/inttools/gptokeyb textinput -1 "downloader.sh" -c "/opt/inttools/downloader.gptk" > /dev/null 2>&1 &
-printf "\033c" > /dev/tty1
-dialog --clear
-trap ExitMenu EXIT
-MainMenu
+}
+
+# Descarga el script si todo está bien
+# download_script() {
+    # echo "⬇ Descargando script desde $SCRIPT_URL..."
+    # wget -O "$SCRIPT_DEST" "$SCRIPT_URL" || curl -o "$SCRIPT_DEST" "$SCRIPT_URL"
+	# wget -O "$GPTK_DEST" "$GPTK_URL" || curl -o "$GPTK_DEST" "$GPTK_URL"
+	# wget -O "$RC_DEST" "$RC_URL" || curl -o "$RC_DEST" "$RC_URL"
+	# sudo wget -O "$CFG_DEST" "$CFG_URL" || sudo curl -o "$CFG_DEST" "$CFG_URL"
+    # chmod +x "$SCRIPT_DEST"
+    # echo "✔ Script descargado y marcado como ejecutable en $SCRIPT_DEST."
+	# echo "✔ INSTALACIÓN COMPLETA, REINICIANDO."
+	# sleep 4
+	# sudo systemctl restart emulationstation
+# }
+
+# Ejecutar funciones
+check_internet
+install_packages
+update_script
