@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 # Lista de paquetes requeridos.
 REQUIRED_PACKAGES=("curl" "wget" "unzip" "lynx")
 
