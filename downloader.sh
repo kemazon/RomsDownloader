@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # Lista de paquetes requeridos.
 REQUIRED_PACKAGES=("curl" "wget" "unzip" "lynx")
 
@@ -90,7 +89,7 @@ fi
 	# sudo systemctl restart emulationstation
 # }
 
-# Ejecutar funciones
+# Ejecutar funciones disponibles
 check_internet
 install_packages
 update_script
