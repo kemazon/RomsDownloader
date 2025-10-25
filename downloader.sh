@@ -68,8 +68,10 @@ update_script() {
 	
 	if [ "$REMOTE_HASH" != "$LOCAL_HASH" ]; then
 		echo "⚠️  Hay una versión más reciente disponible en GitHub."
+		sleep 5
 	else
 		echo "✅  El script está actualizado."
+		sleep 5
 fi
 }
 
