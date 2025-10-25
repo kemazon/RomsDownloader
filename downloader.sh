@@ -15,7 +15,7 @@ else
     exit 1
 fi
 
-SCRIPT_URL="https://raw.githubusercontent.com/kemazon/RomsDownloader/refs/heads/main/downloader.sh"
+SCRIPT_URL="https://raw.githubusercontent.com/kemazon/RomsDownloader/refs/heads/main/downloader.sh?nocache=$(date%20+%s)"
 SCRIPT_DESTINO="$TOOLS_DEST/$SCRIPT_NAME"
 
 GPTK_URL="https://raw.githubusercontent.com/kemazon/RomsDownloader/refs/heads/main/downloader.gptk"
